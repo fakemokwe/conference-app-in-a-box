@@ -1,193 +1,421 @@
-import React, {Component} from 'react';
-import {TouchableHighlight, TextInput, StyleSheet, Text, View} from 'react-native';
-import { Auth } from 'aws-amplify'
-import Icon from 'react-native-vector-icons/Ionicons'
-import { colors, typography, dimensions } from './theme'
-import BaseHeader from './BaseHeader'
+import React from "react";
+import {
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  StyleSheet,
+  Switch
+} from "react-native";
+// Components: https://react-native-training.github.io/react-native-elements/
+// Header: https://react-native-training.github.io/react-native-elements/docs/0.19.1/header.html
+import { Text, Icon, FormLabel, FormInput } from "react-native-elements";
+// Connect components to Redux
+import { connect } from "react-redux";
 
-export default class Profile extends Component {
-  state = {
-    username: '',
-    email: '',
-    twitter: 'dabit3',
-    github: 'dabit3',
-    isEditing: false
+import { set as setProfile } from "../redux/profile/actions";
+import Constants from "expo-constants";
+import ConnecHeader from "../components/ConnecHeader.js";
+import { Auth, I18n } from 'aws-amplify';
+
+const theme = {
+  colors: {
+    primary: "#6CB4D2",
+    switchOn: "#6CB4D2",
+    switchOff: "#ffe8d3",
+    placeholderTextColor: "#b7b7b7"
   }
-  async componentDidMount() {
-    const user = await Auth.currentAuthenticatedUser()
-    const { signInUserSession: { idToken: { payload }}} = user
-    this.setState({
-      username: user.username,
-      email: payload.email
-    })
+};
+
+// Profile Tab
+class Profile extends React.Component {
+  // Have component local state hold form field text
+  constructor(props) {
+    super(props);
+    this.state = { switch: false, text: "" };
   }
-  toggleForm = () => this.setState({ isEditing: !this.state.isEditing })
-  onChange = (key, value) => this.setState({ [key]: value })
-  signOut = () => {
-    Auth.signOut()
-      .then(() => {
-         this.props.screenProps.onStateChange('signedOut', null);
-      })
-      .catch(err => {
-          console.log('err: ', err)
-      })
-  }
+
   render() {
-    const buttonText = this.state.isEditing ? 'Save' : 'Edit Profile'
     return (
-      <View style={styles.container}>
-        <BaseHeader />
-        <View style={styles.profileContainer}>
-          <Text style={styles.username}>{this.state.username}</Text>
-          <Text style={styles.email}>{this.state.email}</Text>
-          {
-            !this.state.isEditing ? (
-              <Social
-                twitter={this.state.twitter}
-                github={this.state.github}
-              />
-            ) : (
-              <Form
-                onChange={this.onChange}
-                twitter={this.state.twitter}
-                github={this.state.github}
-              />
-            )
-          }
-          <View style={styles.buttonContainer}>
-            <TouchableHighlight
-              onPress={this.toggleForm}
-              underlayColor='transparent'
-            >
-              <View style={styles.button}>
-                <Text style={styles.buttonText}>
-                  {buttonText}
-                </Text>
-              </View>
-            </TouchableHighlight>
-            <TouchableHighlight
-              onPress={this.signOut}
-              underlayColor='transparent'
-            >
-              <View style={styles.button}>
-                <Text style={styles.buttonText}>
-                  Sign out
-                </Text>
-              </View>
-            </TouchableHighlight>
+      <KeyboardAvoidingView behavior="padding">
+        <ScrollView bounces="False">
+          <ConnecHeader></ConnecHeader>
+          <FormLabel labelStyle={styles.label}>Contact</FormLabel>
+
+          <FormInput
+            containerStyle={styles.inputContainer}
+            placeholder={I18n.get("First Name")}
+            placeholderTextColor={theme.colors.placeholderTextColor}
+            defaultValue={this.props.profile.fname}
+            onChangeText={text => {
+              this.setState({ text });
+              this.props.dispatch(
+                setProfile({
+                  fname: text
+                })
+              );
+            }}
+          />
+
+          <FormInput
+            containerStyle={styles.inputContainer}
+            placeholder={I18n.get("Last Name")}
+            placeholderTextColor={theme.colors.placeholderTextColor}
+            defaultValue={this.props.profile.lname}
+            onChangeText={text => {
+              this.setState({ text });
+              this.props.dispatch(
+                setProfile({
+                  lname: text
+                })
+              );
+            }}
+          />
+
+          <FormInput
+            containerStyle={styles.inputContainer}
+            placeholder="Organization"
+            placeholderTextColor={theme.colors.placeholderTextColor}
+            defaultValue={this.props.profile.company}
+            onChangeText={text => {
+              this.setState({ text });
+              this.props.dispatch(
+                setProfile({
+                  company: text
+                })
+              );
+            }}
+          />
+
+          {/* Phone */}
+          <FormLabel labelStyle={styles.label}>{I18n.get('Phone Number')}</FormLabel>
+          <View style={styles.inputRow}>
+            <FormInput
+              containerStyle={styles.inputContainer}
+              placeholder={I18n.get('Personal Phone')}
+              placeholderTextColor={theme.colors.placeholderTextColor}
+              defaultValue={this.props.profile.hphone}
+              onChangeText={text => {
+                this.setState({ text });
+                this.props.dispatch(
+                  setProfile({
+                    hphone: text
+                  })
+                );
+              }}
+            />
+
+            <Switch
+              trackColor={{
+                true: theme.colors.switchOn,
+                false: theme.colors.switchOff
+              }}
+              onValueChange={isSwitchOn => {
+                this.setState({ isSwitchOn });
+                this.props.dispatch(setProfile({ hphone_sw: isSwitchOn }));
+              }}
+              value={this.props.profile.hphone_sw}
+            />
           </View>
-        </View>
-      </View>
+
+          <View style={styles.inputRow}>
+            <FormInput
+              containerStyle={styles.inputContainer}
+              placeholder={I18n.get('Work Phone')}
+              placeholderTextColor={theme.colors.placeholderTextColor}
+              defaultValue={this.props.profile.wphone}
+              onChangeText={text => {
+                this.setState({ text });
+                this.props.dispatch(
+                  setProfile({
+                    wphone: text
+                  })
+                );
+              }}
+            />
+            <Switch
+              trackColor={{
+                true: theme.colors.switchOn,
+                false: theme.colors.switchOff
+              }}
+              onValueChange={isSwitchOn => {
+                this.setState({ isSwitchOn });
+                this.props.dispatch(setProfile({ wphone_sw: isSwitchOn }));
+              }}
+              value={this.props.profile.wphone_sw}
+            />
+          </View>
+
+          {/* Social Profiles */}
+          <FormLabel labelStyle={styles.label}>{I18n.get('Social Profiles')}</FormLabel>
+          <View style={styles.inputRowSocial}>
+            <Icon
+              name="facebook"
+              type="material-community"
+              iconStyle={styles.icon}
+            />
+            <View style={{ flex: 1 }}>
+              <FormInput
+                containerStyle={styles.inputContainerIcon}
+                autoCapitalize="none"
+                placeholderTextColor={theme.colors.placeholderTextColor}
+                placeholder={"Facebook" + I18n.get("username")}
+                defaultValue={this.props.profile.facebook}
+                onChangeText={text => {
+                  this.setState({ text });
+                  this.props.dispatch(
+                    setProfile({
+                      facebook: text
+                    })
+                  );
+                }}
+              />
+            </View>
+
+            <Switch
+              trackColor={{
+                true: theme.colors.switchOn,
+                false: theme.colors.switchOff
+              }}
+              onValueChange={isSwitchOn => {
+                this.setState({ isSwitchOn });
+                this.props.dispatch(setProfile({ fb_sw: isSwitchOn }));
+              }}
+              value={this.props.profile.fb_sw}
+            />
+          </View>
+
+          <View style={styles.inputRowSocial}>
+            <Icon
+              name="instagram"
+              type="material-community"
+              iconStyle={styles.icon}
+            />
+            <FormInput
+              containerStyle={styles.inputContainerIcon}
+              autoCapitalize="none"
+              placeholder={"Instagram" + I18n.get("username")}
+              placeholderTextColor={theme.colors.placeholderTextColor}
+              defaultValue={this.props.profile.instagram}
+              onChangeText={text => {
+                this.setState({ text });
+                this.props.dispatch(
+                  setProfile({
+                    instagram: text
+                  })
+                );
+              }}
+            />
+            <Switch
+              trackColor={{
+                true: theme.colors.switchOn,
+                false: theme.colors.switchOff
+              }}
+              onValueChange={isSwitchOn => {
+                this.setState({ isSwitchOn });
+                this.props.dispatch(setProfile({ ig_sw: isSwitchOn }));
+              }}
+              value={this.props.profile.ig_sw}
+            />
+          </View>
+
+          <View style={styles.inputRowSocial}>
+            <Icon
+              name="twitter"
+              type="material-community"
+              iconStyle={styles.icon}
+            />
+            <FormInput
+              containerStyle={styles.inputContainerIcon}
+              autoCapitalize="none"
+              placeholder={"Twitter" + I18n.get("username")}
+              placeholderTextColor={theme.colors.placeholderTextColor}
+              defaultValue={this.props.profile.twitter}
+              onChangeText={text => {
+                this.setState({ text });
+                this.props.dispatch(
+                  setProfile({
+                    twitter: text
+                  })
+                );
+              }}
+            />
+
+            <Switch
+              trackColor={{
+                true: theme.colors.switchOn,
+                false: theme.colors.switchOff
+              }}
+              onValueChange={isSwitchOn => {
+                this.setState({ isSwitchOn });
+                this.props.dispatch(setProfile({ tw_sw: isSwitchOn }));
+              }}
+              value={this.props.profile.tw_sw}
+            />
+          </View>
+
+          {/* Work Profiles */}
+          <FormLabel labelStyle={styles.label}>{I18n.get('Work Profiles')}</FormLabel>
+          <View style={styles.inputRowSocial}>
+            <Icon
+              name="linkedin"
+              type="material-community"
+              iconStyle={styles.icon}
+            />
+            <FormInput
+              containerStyle={styles.inputContainerIcon}
+              autoCapitalize="none"
+              placeholder={"LinkedIn" + I18n.get("username")} 
+              placeholderTextColor={theme.colors.placeholderTextColor}
+              defaultValue={this.props.profile.linkedin}
+              onChangeText={text => {
+                this.setState({ text });
+                this.props.dispatch(
+                  setProfile({
+                    linkedin: text
+                  })
+                );
+              }}
+            />
+            <Switch
+              trackColor={{
+                true: theme.colors.switchOn,
+                false: theme.colors.switchOff
+              }}
+              onValueChange={isSwitchOn => {
+                this.setState({ isSwitchOn });
+                this.props.dispatch(setProfile({ li_sw: isSwitchOn }));
+              }}
+              value={this.props.profile.li_sw}
+            />
+          </View>
+
+          <View style={styles.inputRowSocial}>
+            <Icon
+              name="web"
+              type="material-community"
+              iconStyle={styles.icon}
+            />
+            <FormInput
+              containerStyle={styles.inputContainerIcon}
+              autoCapitalize="none"
+              placeholder={I18n.get("Personal Website")}
+              placeholderTextColor={theme.colors.placeholderTextColor}
+              defaultValue={this.props.profile.homepage}
+              onChangeText={text => {
+                this.setState({ text });
+                this.props.dispatch(
+                  setProfile({
+                    homepage: text
+                  })
+                );
+              }}
+            />
+            <Switch
+              trackColor={{
+                true: theme.colors.switchOn,
+                false: theme.colors.switchOff
+              }}
+              onValueChange={isSwitchOn => {
+                this.setState({ isSwitchOn });
+                this.props.dispatch(setProfile({ hp_sw: isSwitchOn }));
+              }}
+              value={this.props.profile.hp_sw}
+            />
+          </View>
+
+          {/* Email */}
+          <FormLabel labelStyle={styles.label}>Email</FormLabel>
+          <View style={styles.inputRow}>
+            <FormInput
+              containerStyle={styles.inputContainer}
+              placeholder={I18n.get("Personal Email")}
+              placeholderTextColor={theme.colors.placeholderTextColor}
+              defaultValue={this.props.profile.homeemail}
+              onChangeText={text => {
+                this.setState({ text });
+                this.props.dispatch(
+                  setProfile({
+                    homeemail: text
+                  })
+                );
+              }}
+            />
+
+            <Switch
+              trackColor={{
+                true: theme.colors.switchOn,
+                false: theme.colors.switchOff
+              }}
+              onValueChange={isSwitchOn => {
+                this.setState({ isSwitchOn });
+                this.props.dispatch(setProfile({ hemail_sw: isSwitchOn }));
+              }}
+              value={this.props.profile.hemail_sw}
+            />
+          </View>
+
+          <View style={styles.inputRow}>
+            <FormInput
+              containerStyle={styles.inputContainer}
+              placeholder={I18n.get("Work / School Email")}
+              placeholderTextColor={theme.colors.placeholderTextColor}
+              defaultValue={this.props.profile.workemail}
+              onChangeText={text => {
+                this.setState({ text });
+                this.props.dispatch(
+                  setProfile({
+                    workemail: text
+                  })
+                );
+              }}
+            />
+            <Switch
+              trackColor={{
+                true: theme.colors.switchOn,
+                false: theme.colors.switchOff
+              }}
+              onValueChange={isSwitchOn => {
+                this.setState({ isSwitchOn });
+                this.props.dispatch(setProfile({ wemail_sw: isSwitchOn }));
+              }}
+              value={this.props.profile.wemail_sw}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     );
   }
 }
 
-const Social = ({ twitter, github}) => (
-  <View>
-    <View style={styles.iconContainer}>
-      <Icon
-        color={colors.highlight}
-        name='logo-twitter'
-        size={29}
-      />
-      <Text style={styles.twitterHandle}>{twitter}</Text>
-    </View>
-    <View style={[styles.iconContainer, styles.twitter]}>
-      <Icon
-        color='white'
-        name='logo-github'
-        size={29}
-      />
-      <Text style={styles.twitterHandle}>{github}</Text>
-    </View>
-  </View>
-)
-
-const Form = ({ onChange, twitter, github }) => (
-  <View>
-    <View>
-      <TextInput
-        onChangeText={value => onChange('twitter', value)}
-        style={styles.input}
-        value={twitter}
-        autoCapitalize='none'
-        autoCorrect={false}
-      />
-    </View>
-    <View>
-      <TextInput
-        onChangeText={value => onChange('github', value)}
-        style={styles.input}
-        value={github}
-        autoCapitalize='none'
-        autoCorrect={false}
-      />
-    </View>
-  </View>
-)
-
 const styles = StyleSheet.create({
-  buttonContainer: {
-    flexDirection: 'row'
+  label: {
+    fontSize: 16,
+    color: "#2B95A3"
   },
-  button: {
-    width: 110,
-    borderWidth: 1,
-    borderColor: colors.highlight,
-    height: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 15,
-    marginLeft: -1,
-    marginRight: 15
+  inputContainer: {
+    flex: 1
   },
-  buttonText: {
-    color: colors.primaryText,
-    marginTop: 3,
-    fontFamily: typography.primary,
-    fontSize: 13
+  inputContainerIcon: {
+    flex: 1
   },
-  input: {
-    height: 45,
-    width: dimensions.width - 30,
-    borderBottomWidth: 2,
-    marginBottom: 8,
-    color: 'rgba(255, 255, 255, .5)',
-    fontSize: 18,
-    fontFamily: typography.primary,
-    borderBottomColor: colors.highlight
+  inputRow: {
+    flexBasis: 80,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    paddingTop: 3,
+    color: "red"
   },
-  twitterHandle: {
-    color: colors.primaryText,
-    fontFamily: typography.primary,
-    fontSize: 18,
-    marginLeft: 15
+  inputRowSocial: {
+    flexBasis: 80,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    paddingTop: 3,
+    paddingLeft: 10
   },
-  iconContainer: {
-    marginTop: 5,
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  gitHub: {
-    marginTop: 15
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.primaryLight
-  },
-  profileContainer: {
-    padding: 20
-  },
-  username: {
-    fontSize: 26,
-    marginBottom: 3,
-    color: colors.primaryText,
-    fontFamily: typography.primary,
-  },
-  email: {
-    color: colors.primaryText,
-    fontSize: 18,
-    marginBottom: 10,
-    fontFamily: typography.primar
+  icon: {
+    color: "#FF9406"
   }
 });
+
+// Connect component to Redux store
+export default connect(state => state)(Profile);

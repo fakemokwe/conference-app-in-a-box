@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {AppState, KeyboardAvoidingView, ScrollView, TextInput, StyleSheet, Text, View , Dimensions, NetInfo} from 'react-native';
-import { API, graphqlOperation, Auth } from 'aws-amplify'
+import { API, graphqlOperation, Auth, I18n } from 'aws-amplify'
 import Constants from 'expo-constants'
 
 import { listCommentsByTalkId } from './graphql/queries'
@@ -130,7 +130,7 @@ export default class Discussion extends Component {
             {
               !this.state.comments.length && (
                 <View style={styles.comment}>
-                  <Text style={styles.message}>No comments yet!</Text>
+                  <Text style={styles.message}>{I18n.get('No comments yet!')}</Text>
                 </View>
               )
             }
@@ -155,7 +155,7 @@ export default class Discussion extends Component {
             style={styles.input}
             onSubmitEditing={this.createMessage}
             autoCapitalize='none'
-            placeholder='Discuss this talk.'
+            placeholder={I18n.get('Discuss this talk.')}
             autoCorrect={false}
           />
           {/* <Button title='Send' onPress={this.createMessage} /> */}

@@ -7,7 +7,7 @@ import BaseHeader from './BaseHeader'
 
 export default class Map extends Component {
   openMap = () => {
-    Linking.openURL('https://goo.gl/maps/DNrmyCTQPDC5RkHc9')
+    Linking.openURL('https://goo.gl/maps/yBKLxWo4aB441QHk9')
       .catch((err) => console.error('An error occurred', err));
   }
   render() {
@@ -17,19 +17,28 @@ export default class Map extends Component {
         <View style={styles.mapContainer}>
           <ScrollView>
             <View style={styles.mapView}>
+              <TouchableHighlight
+                onPress={this.openMap}
+                underlayColor='transparent'
+              >
+                <View style={styles.addressContainer}>
+                  <Text style={[styles.address, styles.addressHeading]}>Kairaba Beach Hotel</Text>
+                  <Text style={styles.address}>Kololi, Greater Banjul Area, The Gambia</Text>
+                </View>
+              </TouchableHighlight>
               <MapView
                 style={styles.mapStyle}
                 initialRegion={{
-                  latitude: 37.78825,
-                  longitude: -122.4324,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
+                  latitude: 13.442978,
+                  longitude: -16.723885,
+                  latitudeDelta: 0.00711,
+                  longitudeDelta: 0.00311,
                 }}
               >
                 <MapView.Marker
                   coordinate={{
-                    latitude: 37.78825,
-                    longitude: -122.4324
+                    latitude: 13.442978,
+                    longitude: -16.723885
                   }}
                 >
                   <View>
@@ -39,16 +48,6 @@ export default class Map extends Component {
                   </View>
                 </MapView.Marker>
               </MapView>
-              <TouchableHighlight
-                onPress={this.openMap}
-                underlayColor='transparent'
-              >
-                <View style={styles.addressContainer}>
-                  <Text style={[styles.address, styles.addressHeading]}>AWS Loft</Text>
-                  <Text style={styles.address}>525 Market St #2</Text>
-                  <Text style={styles.address}>San Francisco, CA 94105</Text>
-                </View>
-              </TouchableHighlight>
             </View>
           </ScrollView>
         </View>
@@ -64,7 +63,7 @@ const styles = StyleSheet.create({
     borderRadius: 5
   },
   addressContainer: {
-    paddingVertical: 20
+    paddingVertical: 10
   },
   address: {
     color: colors.primaryText,
@@ -76,7 +75,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: typography.medium,
     marginBottom: 5,
-    color: colors.highlight
+    color: colors.highlight,
+    textDecorationLine: 'underline'
   },
   container: {
     flex: 1,

@@ -5,6 +5,7 @@ import Carousel from 'react-native-snap-carousel'
 import Talk from './Talk'
 import Discussion from './Discussion'
 import { typography, colors, dimensions } from './theme'
+import { Auth, I18n } from 'aws-amplify'
 
 export default class Pager extends Component {
   static navigationOptions = (props) => ({
@@ -46,7 +47,7 @@ export default class Pager extends Component {
                   style={[styles.button, getButtonStyle(0, index)]}
                 >
                   <Text
-                  style={styles.buttonText}>Talk Info</Text>
+                  style={styles.buttonText}>{I18n.get('Talk Info')}</Text>
                 </View>
               </TouchableHighlight>
               <TouchableHighlight
@@ -55,7 +56,7 @@ export default class Pager extends Component {
               onPress={() => this.updateIndex(1)}>
                 <View style={[styles.button, getButtonStyle(1, index)]}>
                   <Text
-                    style={styles.buttonText}>Discuss</Text>
+                    style={styles.buttonText}>{I18n.get('Discuss')}</Text>
                 </View>
               </TouchableHighlight>
             </View>

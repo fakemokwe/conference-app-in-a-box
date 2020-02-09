@@ -1,27 +1,59 @@
 import React from 'react'
-import { View, Image, StyleSheet } from 'react-native'
-import { createBottomTabNavigator, createAppContainer } from 'react-navigation'
-import { Hub, Auth } from 'aws-amplify'
+import { View, Image, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native'
+import { createAppContainer } from 'react-navigation'
+import { createBottomTabNavigator } from 'react-navigation-tabs';
+import { Hub, Auth, I18n } from 'aws-amplify'
 import { withAuthenticator } from 'aws-amplify-react-native'
 import AmplifyTheme from 'aws-amplify-react-native/src/AmplifyTheme'
 import { FontAwesome } from '@expo/vector-icons'
-import { Font } from 'expo'
+import * as Font from 'expo-font'
+import * as Localization from 'expo-localization'
 
 import Schedule from './Schedule'
 import Profile from './Profile'
 import Map from './Map'
+import Home from './Home'
+import { connect } from 'react-redux';
+
+// Import Provider to wrap our app's highest level component
+import { Provider } from 'react-redux';
+
+// Import our app's store and persistor
+import {store, persistor } from '../redux/store';
+
+// Wrap root component with PersistGate
+import { PersistGate } from 'redux-persist/lib/integration/react';
 
 import { colors, logo } from './theme'
 
+const langLoc = Localization.locale;
+
+I18n.setLanguage(langLoc);
+
 const TabNavigator = createBottomTabNavigator({
+  Home: {
+    screen: Home,
+    navigationOptions: ({ navigation }) => ({
+      title: I18n.get('Home'),
+    })
+  },
   Schedule: {
-    screen: Schedule
+    screen: Schedule,
+    navigationOptions: ({ navigation }) => ({
+      title: I18n.get('Schedule'),
+    })    
   },
   Profile: {
-    screen: Profile
+    screen: Profile,
+    navigationOptions: ({ navigation }) => ({
+      title: I18n.get('Profile'),
+    })
   },
   Map: {
     screen: Map,
+    navigationOptions: ({ navigation }) => ({
+      title: I18n.get('Map'),
+    })    
   }
 }, {
   tabBarOptions: {
@@ -34,6 +66,9 @@ const TabNavigator = createBottomTabNavigator({
   defaultNavigationOptions: ({ navigation }) => ({
     tabBarIcon: ({ tintColor }) => {
       const { routeName } = navigation.state
+      if (routeName === 'Home') {
+        return <FontAwesome color={tintColor} size={20} name='home' />
+      }
       if (routeName === 'Schedule') {
         return <FontAwesome color={tintColor} size={20} name='calendar' />
       }
@@ -56,7 +91,11 @@ class TabNavWithProps extends React.Component {
   static router = TabNavigator.router
   render() {
     return(
-      <TabNavigator screenProps={{...this.props}} {...this.props}  />
+        <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <TabNavigator screenProps={{...this.props}} {...this.props}  />
+        </PersistGate>
+        </Provider>
     )
   }
 }
@@ -99,12 +138,87 @@ class AppWithAuth extends React.Component {
     })
   }
   render() {
-    const AppComponent = withAuthenticator(App, null, null, null, theme)
+    const signUpConfig = {
+      defaultCountryCode: '220',
+      signUpFields: [
+        {
+          label: I18n.get('Country of residence'),
+          key: 'country',
+          custom: true,
+          type: 'string', 
+          displayOrder: 3,
+          placeholder: I18n.get('Country of residence')
+        },
+        {
+          label: I18n.get('Last Name'),
+          key: 'family_name',
+          custom: true,
+          type: 'string',
+          displayOrder: 2,
+          placeholder: I18n.get('Last Name')
+        },
+        {
+          label: I18n.get('First Name'),
+          key: 'given_name',
+          custom: true,
+          type: 'string',
+          displayOrder: 1,
+          placeholder: I18n.get('First Name')
+        },
+        {
+          label: I18n.get('Membership Status'),
+          key: 'membership',
+          custom: true,
+          type: 'string',
+          displayOrder: 4,
+          placeholder: 'Fellow/Member/None'
+        },
+        {
+          label: I18n.get('Username'),
+          key: 'username',
+          required: true,
+          type: 'string',
+          displayOrder: 5,
+          placeholder: I18n.get('Username')
+        },
+        {
+          label: I18n.get('Password'),
+          key: 'password',
+          required: true,
+          type: 'password',
+          displayOrder: 6,
+          placeholder: I18n.get('8+ characters(CAPS+lower+numb3rs)')
+        },
+        {
+          label: I18n.get('Email'),
+          key: 'email',
+          required: true,
+          type: 'email',
+          displayOrder: 7,
+          placeholder: I18n.get('Email')
+        },        
+        {
+          label: I18n.get('Phone Number'),
+          key: 'phone_number',
+          required: true,
+          type: 'string',
+          displayOrder: 8,
+          placeholder: I18n.get('Phone Number')
+        }, 
+      ]
+    };
+
+    const AppComponent = withAuthenticator(App, { signUpConfig }, null, null, theme)
     return (
-      <View style={styles.appContainer}>
-        {!this.state.signedIn && <Logo />}
-        <AppComponent {...this.props} />
-      </View>
+          <KeyboardAvoidingView style={styles.appContainer} behavior="padding" enabled>
+            <ScrollView style={styles.appContainer}>
+              <View style={styles.appContainer}>
+                {!this.state.signedIn && <Logo />}
+                  <AppComponent {...this.props} />
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>  
+
     )
   }
 }
@@ -121,10 +235,11 @@ const Logo = () => (
 
 const styles = StyleSheet.create({
   appContainer: {
-    flex: 1
+    flex: 1,
+    justifyContent: 'center'
   },
   logoContainer: {
-    marginTop: 70,
+    marginTop: 40,
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -134,4 +249,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default AppWithAuth
+export default AppWithAuth;

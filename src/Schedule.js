@@ -1,14 +1,21 @@
 import React, {Component} from 'react'
 import {ActivityIndicator, Image, ScrollView, TouchableHighlight, TouchableOpacity, StyleSheet, Text, View} from 'react-native'
-import { createStackNavigator } from 'react-navigation'
+import { createStackNavigator } from 'react-navigation-stack';
 import Pager from './Pager'
 import { colors, typography, dimensions, logo } from './theme'
 
 import { API, graphqlOperation } from 'aws-amplify'
 import { listTalks } from './graphql/queries'
 
-const day1 = 'November 10'
-const day2 = 'November 11'
+
+const day1 = 'October 26'
+const day2 = 'October 27'
+const day3 = 'October 28'
+const day4 = 'October 29'
+const day5 = 'October 30'
+const day6 = 'October 31'
+
+
 
 class Schedule extends Component {
   static navigationOptions = props => ({
@@ -84,7 +91,8 @@ class Schedule extends Component {
           }
           </View>
         </ScrollView>
-        <View style={styles.tabBottomContainer}>
+        
+        <ScrollView horizontal='true' style={styles.tabBottomContainer}>
           <TouchableHighlight
             underlayColor={colors.primaryDark}
             onPress={() => this.toggleDate(day1)}
@@ -101,7 +109,39 @@ class Schedule extends Component {
               <Text style={[styles.bottomButtonText]}>{day2}</Text>
             </View>
           </TouchableHighlight>
-        </View>
+          <TouchableHighlight
+            underlayColor={colors.primaryDark}
+            onPress={() => this.toggleDate(day3)}
+          >
+            <View style={[getButtonStyle(day3, date), styles.bottomButton]}>
+              <Text style={[styles.bottomButtonText]}>{day3}</Text>
+            </View>
+          </TouchableHighlight>
+          <TouchableHighlight
+            underlayColor={colors.primaryDark}
+            onPress={() => this.toggleDate(day4)}
+          >
+            <View style={[getButtonStyle(day4, date), styles.bottomButton]}>
+              <Text style={[styles.bottomButtonText]}>{day4}</Text>
+            </View>
+          </TouchableHighlight>
+          <TouchableHighlight
+            underlayColor={colors.primaryDark}
+            onPress={() => this.toggleDate(day5)}
+          >
+            <View style={[getButtonStyle(day5, date), styles.bottomButton]}>
+              <Text style={[styles.bottomButtonText]}>{day5}</Text>
+            </View>
+          </TouchableHighlight>
+          <TouchableHighlight
+            underlayColor={colors.primaryDark}
+            onPress={() => this.toggleDate(day6)}
+          >
+            <View style={[getButtonStyle(day6, date), styles.bottomButton]}>
+              <Text style={[styles.bottomButtonText]}>{day6}</Text>
+            </View>
+          </TouchableHighlight>
+        </ScrollView>  
       </View>
     );
   }
